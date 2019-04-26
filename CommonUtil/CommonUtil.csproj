@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>TheTraumer.CommonUtil</PackageId>
+    <Version>1.0.1</Version>
+    <Authors>TheTraumer</Authors>
+    <Company>None</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <IncludeSource>true</IncludeSource>
+    <RepositoryUrl>https://github.com/thetraumer/commonutil</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
