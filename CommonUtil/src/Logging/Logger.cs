@@ -11,8 +11,8 @@ namespace CommonUtil.Logging {
             return DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fff");
         }
 
-        private string GetHeaderLine(LogLevel level) {
-            return GetTsStr() + " " + typeof(T).Name + " " + level.ToString() + ":" + Environment.NewLine;
+        private string GetEntryPrefix(LogLevel level) {
+            return GetTsStr() + " " + typeof(T).Name + " " + level.ToString() + ": ";
         }
 
         private void WriteToLog(string logEntry) {
@@ -20,7 +20,7 @@ namespace CommonUtil.Logging {
         }
 
         public void Log(LogLevel level, string message) {
-            string logEntry = GetHeaderLine(level) + "\t" + message;
+            string logEntry = GetEntryPrefix(level) + message;
             Task.Run(() => WriteToLog(logEntry));
         }
 
