@@ -32,8 +32,12 @@ namespace CommonUtil {
             return result;
         }
 
+        public static string BytesToString(byte[] bytes, Encoding encoding) {
+            return encoding.GetString(bytes);
+        }
+
         public static string BytesToString(byte[] bytes) {
-            return Encoding.UTF8.GetString(bytes);
+            return BytesToString(bytes, Encoding.UTF8);
         }
 
         public static byte[] StringToBytes(string str) {
