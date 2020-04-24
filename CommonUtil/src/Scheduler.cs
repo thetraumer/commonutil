@@ -20,7 +20,7 @@ namespace CommonUtil {
             return runningQueueTasks[runQueueId];
         }
 
-        private void ContinueWith(int runQueueId, Action action) {
+        private void ContinueWith(long runQueueId, Action action) {
             lock(lockObj) {
                 Task newTask = GetRunningTask(runQueueId).ContinueWith((t) => action(), CancelToken,
                     TaskContinuationOptions.OnlyOnRanToCompletion, taskScheduler);
@@ -59,11 +59,11 @@ namespace CommonUtil {
             }
         }
 
-        public void Schedule(int runQueueId, Action action) {
+        public void Schedule(long runQueueId, Action action) {
             Schedule(runQueueId, action, TimeSpan.Zero);
         }
 
-        public void Schedule(int runQueueId, Action action, TimeSpan delay) {
+        public void Schedule(long runQueueId, Action action, TimeSpan delay) {
             if (delay.Ticks == TimeSpan.Zero.Ticks)
                 ContinueWith(runQueueId, action);
             else

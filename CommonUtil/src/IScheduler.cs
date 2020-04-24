@@ -5,9 +5,9 @@ namespace CommonUtil {
 
         void WaitCompletion(TimeSpan timeout);
 
-        void Schedule(int runQueueId, Action action);
+        void Schedule(long runQueueId, Action action);
 
-        void Schedule(int runQueueId, Action action, TimeSpan delay);
+        void Schedule(long runQueueId, Action action, TimeSpan delay);
 
         void ScheduleGeneralTask(Action action, TimeSpan delay);
 
