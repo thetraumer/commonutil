@@ -20,11 +20,13 @@ namespace CommonUtil {
             return runningQueueTasks[runQueueId];
         }
 
-        private void ContinueWith(long runQueueId, Action action) {
+        private Task ContinueWith(long runQueueId, Action action) {
             lock(lockObj) {
-                Task newTask = GetRunningTask(runQueueId).ContinueWith((t) => action(), CancelToken,
+                Task newTask = GetRunningTask(runQueueId)
+                    .ContinueWith((t) => action(), CancelToken,
                     TaskContinuationOptions.OnlyOnRanToCompletion, taskScheduler);
                 runningQueueTasks[runQueueId] = newTask;
+                return newTask;
             }
         }
 
@@ -59,19 +61,14 @@ namespace CommonUtil {
             }
         }
 
-        public void Schedule(long runQueueId, Action action) {
-            Schedule(runQueueId, action, TimeSpan.Zero);
+        public Task Schedule(long runQueueId, Action action) {
+            return ContinueWith(runQueueId, action);
         }
 
         public void Schedule(long runQueueId, Action action, TimeSpan delay) {
-            if (delay.Ticks == TimeSpan.Zero.Ticks)
-                ContinueWith(runQueueId, action);
-            else
-                Task.Factory.StartNew(() => {
-                    Task.Delay((int) delay.TotalMilliseconds, CancelToken).Wait();
-                    if (!CancelToken.IsCancellationRequested)
-                        ContinueWith(runQueueId, action);
-                }, CancelToken);
+            Task.Delay((int) delay.TotalMilliseconds, CancelToken)
+                .ContinueWith((t) => Schedule(runQueueId, action), CancelToken,
+                    TaskContinuationOptions.OnlyOnRanToCompletion, taskScheduler);
         }
 
         public void ScheduleGeneralTask(Action action, TimeSpan delay) {

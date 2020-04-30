@@ -1,11 +1,12 @@
 using System;
+using System.Threading.Tasks;
 
 namespace CommonUtil {
     public interface IScheduler {
 
         void WaitCompletion(TimeSpan timeout);
 
-        void Schedule(long runQueueId, Action action);
+        Task Schedule(long runQueueId, Action action);
 
         void Schedule(long runQueueId, Action action, TimeSpan delay);
 

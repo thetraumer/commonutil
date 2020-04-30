@@ -30,6 +30,28 @@ namespace CommonUtil.Tests {
         }
 
         [Fact]
+        public void TestReturnExecutedTask() {
+            Scheduler scheduler = new Scheduler();
+            int val = 0;
+            scheduler.Schedule(0, () => {
+                if (val == 0)
+                    ++val;
+            });
+            TestUtil.Pause(10);
+            scheduler.Schedule(0, () => {
+                if (val == 1)
+                    ++val;
+            });
+            TestUtil.Pause(10);
+            var lastTask = scheduler.Schedule(0, () => {
+                if (val == 2)
+                    ++val;
+            });
+            lastTask.Wait(TimeSpan.FromSeconds(1));
+            Assert.Equal(3, val);
+        }
+
+        [Fact]
         public void TestGeneralTaskSequence() {
             Scheduler scheduler = new Scheduler();
             int val = 0;
