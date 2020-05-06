@@ -179,5 +179,26 @@ namespace CommonUtil.Tests {
             TestUtil.Pause(200);
             Assert.Throws<ArgumentException>(() => scheduler.WaitCompletion(TimeSpan.FromSeconds(1)));
         }
+
+        [Fact]
+        public void TestRunQueueTaskCancelled() {
+            Scheduler scheduler = new Scheduler(SchedulerContinuation.ContinueOnCancelled);
+            int val = 0;
+            var task1 = scheduler.Schedule(0, () => {
+                Task.Delay(100);
+                throw new TaskCanceledException();
+            });
+            var task2 = scheduler.Schedule(0, () => {
+                if (val == 0)
+                    ++val;
+            });
+            TestUtil.Pause(10);
+            scheduler.Schedule(0, () => {
+                if (val == 1)
+                    ++val;
+            });
+            scheduler.WaitCompletion(TimeSpan.FromSeconds(1));
+            Assert.Equal(2, val);
+        }
     }
 }

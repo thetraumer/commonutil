@@ -41,7 +41,11 @@ namespace CommonUtil.Logging {
         }
 
         public void LogException(LogLevel level, Exception ex) {
-            string msg = "Error: " + ex.GetType().Name + " - " + ex.Message + Environment.NewLine + ex.StackTrace;
+            string msg = $"Error: {ex.GetType().Name} - {ex.Message}{Environment.NewLine}{ex.StackTrace}";
+            if (ex.InnerException != null)
+                msg += $"{Environment.NewLine}Caused by: "
+                    + $"{ex.InnerException.GetType().Name} - {ex.InnerException.Message}"
+                    + $"{Environment.NewLine}{ex.InnerException.StackTrace}";
             Log(level, msg);
         }
     }

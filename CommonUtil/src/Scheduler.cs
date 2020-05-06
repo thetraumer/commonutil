@@ -6,6 +6,10 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace CommonUtil {
+    public enum SchedulerContinuation {
+        ContinueOnCancelled,
+        NotContinueOnCancelled
+    }
     public class Scheduler : IScheduler {
         private CancellationTokenSource cancelSource = new CancellationTokenSource();
         private CancellationToken CancelToken { get { return cancelSource.Token; } }
@@ -13,6 +17,14 @@ namespace CommonUtil {
         private TaskScheduler taskScheduler = TaskScheduler.Default;
         private volatile Task runningGeneralTask = Task.CompletedTask;
         private object lockObj = new object();
+        private TaskContinuationOptions continuationOptions;
+
+        public Scheduler(SchedulerContinuation schedulerContinuation = SchedulerContinuation.NotContinueOnCancelled) {
+            continuationOptions = schedulerContinuation switch {
+                SchedulerContinuation.ContinueOnCancelled => TaskContinuationOptions.None,
+                _ => TaskContinuationOptions.OnlyOnRanToCompletion
+            };
+        }
 
         private Task GetRunningTask(long runQueueId) {
             if (!runningQueueTasks.ContainsKey(runQueueId))
@@ -24,7 +36,7 @@ namespace CommonUtil {
             lock(lockObj) {
                 Task newTask = GetRunningTask(runQueueId)
                     .ContinueWith((t) => action(), CancelToken,
-                    TaskContinuationOptions.OnlyOnRanToCompletion, taskScheduler);
+                    continuationOptions, taskScheduler);
                 runningQueueTasks[runQueueId] = newTask;
                 return newTask;
             }
@@ -46,7 +58,7 @@ namespace CommonUtil {
         private void ContinueWithGeneralTask(Action taskPayload) {
             lock(lockObj) {
                 Task newGeneralTask = runningGeneralTask.ContinueWith(CreateGeneralTaskAction(taskPayload),
-                    CancelToken, TaskContinuationOptions.OnlyOnRanToCompletion, taskScheduler);
+                    CancelToken, continuationOptions, taskScheduler);
                 runningGeneralTask = newGeneralTask;
             }
         }
@@ -68,7 +80,7 @@ namespace CommonUtil {
         public void Schedule(long runQueueId, Action action, TimeSpan delay) {
             Task.Delay((int) delay.TotalMilliseconds, CancelToken)
                 .ContinueWith((t) => Schedule(runQueueId, action), CancelToken,
-                    TaskContinuationOptions.OnlyOnRanToCompletion, taskScheduler);
+                    continuationOptions, taskScheduler);
         }
 
         public void ScheduleGeneralTask(Action action, TimeSpan delay) {
